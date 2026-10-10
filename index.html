@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>test</title>
+    <style>
+        /* Estilos generales */
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            overflow: hidden; /* Evita que aparezcan barras de desplazamiento cuando el botón huye */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* Lluvia de corazones de fondo */
+        .heart {
+            position: absolute;
+            color: red;
+            animation: floatUp linear infinite;
+            z-index: 0;
+            opacity: 0.6;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0.5); opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+        }
+
+        /* Contenedor central */
+        .container {
+            z-index: 10;
+            background: rgba(20, 20, 20, 0.8);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.4);
+            max-width: 90%;
+            width: 500px;
+        }
+
+        h1 {
+            font-size: 2.2em;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        a.map-link {
+            display: inline-block;
+            margin-top: 10px;
+            color: #ff4d4d;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: color 0.3s;
+        }
+
+        a.map-link:hover {
+            color: #ff1a1a;
+            text-decoration: underline;
+        }
+
+        /* Contenedor de botones */
+        .buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            height: 80px; 
+        }
+
+        button {
+            padding: 15px 35px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: transform 0.2s, background 0.3s;
+            z-index: 20;
+        }
+
+        #btn-aceptar {
+            background-color: #ff4d4d;
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 77, 77, 0.4);
+        }
+
+        #btn-aceptar:hover {
+            background-color: #ff1a1a;
+            transform: scale(1.1);
+        }
+
+        #btn-rechazar {
+            background-color: #555;
+            color: white;
+        }
+
+        /* Mensaje de éxito oculto inicialmente */
+        #success-message {
+            display: none;
+            z-index: 10;
+            background: rgba(20, 20, 20, 0.9);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.6);
+        }
+
+        #success-message h1 {
+            color: #ff4d4d;
+        }
+
+        .animals {
+            font-size: 4rem; /* Animales en forma de emojis caricatura gigantes */
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            animation: bounce 1s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-15px); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Script para generar la lluvia de corazones -->
+    <script>
+        function createHearts() {
+            for (let i = 0; i < 35; i++) {
+                let heart = document.createElement('div');
+                heart.classList.add('heart');
+                heart.innerHTML = '❤️';
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDuration = (Math.random() * 3 + 4) + 's'; /* Entre 4s y 7s */
+                heart.style.animationDelay = Math.random() * 5 + 's';
+                heart.style.fontSize = (Math.random() * 20 + 15) + 'px'; /* Tamaño aleatorio */
+                document.body.appendChild(heart);
+            }
+        }
+        createHearts();
+    </script>
+
+    <!-- Contenido principal -->
+    <div class="container" id="main-container">
+        <h1>¿Querés tener una cita conmigo el miércoles a las 16hs?</h1>
+        <p>
+            Lugar de la cita:<br>
+            <a href="https://maps.app.goo.gl/x8Mx5RPVBbD5joaQ6" target="_blank" class="map-link">📍 Abrir mapa del lugar</a>
+        </p>
+        <div class="buttons">
+            <button id="btn-aceptar" onclick="acceptDate()">Aceptar</button>
+            <!-- Eventos mouseover para PC y touchstart para celulares -->
+            <button id="btn-rechazar" onmouseover="flee(this)" ontouchstart="flee(this)">Rechazar</button>
+        </div>
+    </div>
+
+    <!-- Pantalla de éxito -->
+    <div id="success-message">
+        <h1>¡Sabía que dirías que sí! ❤️</h1>
+        <div class="animals">
+            🐶😍 🐱💖 🐰🥰 🐻💘
+        </div>
+        <p style="font-size: 1.5em; color: #ccc;">¡Cita agendada! Revisá tu calendario.<br>¡Gracias por aceptar!</p>
+    </div>
+
+    <!-- Script de interacción -->
+    <script>
+        // Función para que el botón de rechazar huya
+        function flee(btn) {
+            btn.style.position = 'fixed';
+            
+            // Calculamos el espacio disponible en la pantalla
+            const maxX = window.innerWidth - btn.offsetWidth - 20;
+            const maxY = window.innerHeight - btn.offsetHeight - 20;
+            
+            // Generamos posiciones aleatorias
+            const randomX = Math.max(10, Math.floor(Math.random() * maxX));
+            const randomY = Math.max(10, Math.floor(Math.random() * maxY));
+            
+            // Aplicamos las nuevas coordenadas
+            btn.style.left = randomX + 'px';
+            btn.style.top = randomY + 'px';
+        }
+
+        // Función cuando presiona Aceptar
+        function acceptDate() {
+            // Ocultar pregunta y mostrar celebración
+            document.getElementById('main-container').style.display = 'none';
+            document.getElementById('success-message').style.display = 'block';
+
+            // --- Lógica para crear el evento en Google Calendar ---
+            
+            // 1. Encontrar la fecha del "próximo miércoles"
+            const now = new Date();
+            const dayOfWeek = now.getDay();
+            // Si hoy es de Jueves(4) a Miércoles(3), sumamos lo necesario para el prox miércoles
+            const daysUntilWednesday = (3 - dayOfWeek + 7) % 7 || 7; 
+            
+            // Configurar a las 16:00 hs
+            const nextWednesday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysUntilWednesday, 16, 0, 0);
+            // El evento durará 2 horas (hasta las 18:00)
+            const endTime = new Date(nextWednesday.getTime() + 2 * 60 * 60 * 1000); 
+
+            // 2. Formatear la fecha para la URL de Google Calendar (formato UTC: YYYYMMDDTHHmmssZ)
+            const formatTime = (date) => date.toISOString().replace(/-|:|\.\d\d\d/g, "");
+            const startStr = formatTime(nextWednesday);
+            const endStr = formatTime(endTime);
+
+            // 3. Crear los datos del evento
+            const title = encodeURIComponent("Cita súper especial ❤️");
+            const details = encodeURIComponent("¡Tenemos una cita agendada! No me vayas a fallar.");
+            const location = encodeURIComponent("https://maps.app.goo.gl/x8Mx5RPVBbD5joaQ6");
+
+            // 4. Generar URL
+            const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startStr}/${endStr}&details=${details}&location=${location}`;
+
+            // 5. Abrir Google Calendar en una pestaña nueva
+            window.open(googleCalendarUrl, '_blank');
+        }
+    </script>
+</body>
+</html>
